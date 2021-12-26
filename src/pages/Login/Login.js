@@ -1,31 +1,66 @@
-import { Button, Checkbox, Form, Input } from 'antd';
+import { Alert, Button, Form, Input } from 'antd';
 import React from 'react';
 
-class Login extends React.PureComponent {
-  render() {
-    const onFinish = values => {
-      console.log('Success:', values);
-    };
+import getExpiredDate from '../../utils/getExpiredDate';
 
-    const onFinishFailed = errorInfo => {
-      console.log('Failed:', errorInfo);
-    };
+class Login extends React.PureComponent {
+  state = {
+    error: '',
+  };
+
+  handleFinish = async values => {
+    try {
+      const response = await fetch(
+        'https://acits-api.herokuapp.com/api/token/',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(values),
+        },
+      );
+
+      if (response.status !== 200) throw new Error();
+
+      const { access, refresh } = await response.json();
+      const session = {
+        access,
+        refresh,
+        expiredDate: getExpiredDate(),
+      };
+
+      localStorage.setItem('session', JSON.stringify(session));
+
+      window.location.replace('/today');
+    } catch (error) {
+      this.setState({
+        error: 'Имя пользователя или пароль введены не верно',
+      });
+    }
+  };
+
+  handleValuesChange = () => {
+    this.setState({
+      error: '',
+    });
+  };
+
+  render() {
+    const { error } = this.state;
 
     return (
       <Form
         autoComplete="off"
-        initialValues={{
-          remember: true,
-        }}
         labelCol={{
-          span: 8,
+          span: 7,
         }}
-        name="basic"
+        name="auth"
         wrapperCol={{
-          span: 16,
+          span: 10,
         }}
-        onFinish={onFinish}
-        onFinishFailed={onFinishFailed}
+        onFinish={this.handleFinish}
+        onValuesChange={this.handleValuesChange}
       >
         <Form.Item
           label="Username"
@@ -53,21 +88,21 @@ class Login extends React.PureComponent {
           <Input.Password />
         </Form.Item>
 
-        <Form.Item
-          name="remember"
-          valuePropName="checked"
-          wrapperCol={{
-            offset: 8,
-            span: 16,
-          }}
-        >
-          <Checkbox>Remember me</Checkbox>
-        </Form.Item>
+        {error && (
+          <Form.Item
+            wrapperCol={{
+              offset: 7,
+              span: 10,
+            }}
+          >
+            <Alert message={error} type="error" />
+          </Form.Item>
+        )}
 
         <Form.Item
           wrapperCol={{
-            offset: 8,
-            span: 16,
+            offset: 7,
+            span: 10,
           }}
         >
           <Button htmlType="submit" type="primary">
