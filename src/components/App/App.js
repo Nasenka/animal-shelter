@@ -1,7 +1,13 @@
 import { Layout, Menu } from 'antd';
 import 'antd/dist/antd.css';
 import React from 'react';
-import { Link, Route, BrowserRouter as Router, Switch } from 'react-router-dom';
+import {
+  Link,
+  Redirect,
+  Route,
+  BrowserRouter as Router,
+  Switch,
+} from 'react-router-dom';
 
 import Animals from '../../pages/Animals';
 import Login from '../../pages/Login';
@@ -12,6 +18,7 @@ import style from './App.module.css';
 class App extends React.PureComponent {
   render() {
     const { Header, Footer, Content } = Layout;
+    const loggedIn = localStorage.getItem('session');
 
     return (
       <Router>
@@ -31,10 +38,11 @@ class App extends React.PureComponent {
           <Content style={{ padding: '50px 0' }}>
             <div className={style.container}>
               <Switch>
-                <Route exact path="/">
-                  <Login />
+                <Route exact path="/login">
+                  {!loggedIn ? <Login /> : <Redirect to="/" />}
                 </Route>
-                <Route path="/today">
+                {!loggedIn && <Redirect to="/login" />}
+                <Route exact path={['/', '/today']}>
                   <Today />
                 </Route>
                 <Route path="/animals">

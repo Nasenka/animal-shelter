@@ -84,7 +84,9 @@ class Today extends React.PureComponent {
           <p>Тип: {todayAnimals[animalIndex].animal.spec_parent_name}</p>
           <p>Подтип: {todayAnimals[animalIndex].animal.spec_name}</p>
           <p>Назначение: {todayAnimals[animalIndex].my_type}</p>
-          <Title level={5}>Лекарства</Title>
+          {todayAnimals[animalIndex].drugs.length > 0 ? (
+            <Title level={5}>Лекарства</Title>
+          ) : null}
           <ol>{drugList}</ol>
         </>
       );
